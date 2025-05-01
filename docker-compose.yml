@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  gateway-service:
+    build: ./gateway-service
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - JWT_SECRET=your-jwt-secret-key
+    depends_on:
+      - service-registry
+
+  # Service Registry (Eureka)
+  service-registry:
+    build: ./service-registry
+    ports:
+      - "8761:8761"
+
+  # User Service
+  user-service:
+    build: ./user-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecomsync
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=user_service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+    depends_on:
+      - postgres
+      - service-registry
+
+  # Product Service
+  product-service:
+    build: ./product-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecomsync
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=product_service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+    depends_on:
+      - postgres
+      - service-registry
+
+  # Order Service
+  order-service:
+    build: ./order-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecomsync
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=order_service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+    depends_on:
+      - postgres
+      - service-registry
+
+  # Payment Service
+  payment-service:
+    build: ./payment-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecomsync
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=payment_service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+    depends_on:
+      - postgres
+      - service-registry
+
+  # Shipping Service
+  shipping-service:
+    build: ./shipping-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecomsync
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=shipping_service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+    depends_on:
+      - postgres
+      - service-registry
+
+  # Chatbot Service
+  chatbot-service:
+    build: ./chatbot-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecomsync
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=chatbot_service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+      - OPENAI_API_KEY=your-openai-api-key
+      - OPENAI_MODEL=gpt-4o
+    depends_on:
+      - postgres
+      - service-registry
+
+  # Notification Service
+  notification-service:
+    build: ./notification-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecomsync
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=notification_service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+    depends_on:
+      - postgres
+      - service-registry
+
+  # WebSocket Service
+  websocket-service:
+    build: ./websocket-service
+    ports:
+      - "8085:8085"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+    depends_on:
+      - service-registry
+
+  # PostgreSQL
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=ecomsync
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+volumes:
+  postgres-data:
