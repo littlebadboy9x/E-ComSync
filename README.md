@@ -97,4 +97,4 @@ Mail: Vuongtv1237.dev@gmail.com
 
 ---
 
-# © 2025 Tran Viet Vuong. All rights reserved.
+© 2025 Tran Viet Vuong. All rights reserved.
