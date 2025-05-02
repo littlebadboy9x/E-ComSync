@@ -34,6 +34,7 @@ const product = {
         "/placeholder.svg?height=600&width=600",
         "/placeholder.svg?height=600&width=600",
     ],
+    image_url: "/placeholder.svg?height=600&width=600",
     stock: 15,
     categories: ["Electronics", "Audio", "Headphones"],
 }
@@ -80,7 +81,12 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                         <div className="md:w-1/2 p-6">
                             <div className="mb-4">
                                 <img
-                                    src={product.images[0] || "/placeholder.svg"}
+                                    src={
+                                        (product.images && product.images.length > 0 && product.images[0]) ||
+                                        product.image_url ||
+                                        product.imageUrl ||
+                                        "/placeholder.svg"
+                                    }
                                     alt={product.name}
                                     className="w-full h-auto rounded-lg"
                                 />
@@ -92,7 +98,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                                         className="border-2 border-gray-200 rounded-lg overflow-hidden hover:border-emerald-500 cursor-pointer"
                                     >
                                         <img
-                                            src={image || "/placeholder.svg"}
+                                            src={image || product.image_url || product.imageUrl || "/placeholder.svg"}
                                             alt={`${product.name} - View ${index + 1}`}
                                             className="w-full h-auto"
                                         />

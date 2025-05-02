@@ -1,121 +1,53 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { ShoppingCart, Heart } from "lucide-react"
-
-const products = [
-    {
-        id: 1,
-        name: "Wireless Headphones",
-        price: 129.99,
-        discountPrice: 99.99,
-        image: "/placeholder.svg?height=300&width=300",
-        rating: 4.5,
-        reviews: 128,
-        slug: "wireless-headphones",
-    },
-    {
-        id: 2,
-        name: "Smart Watch",
-        price: 199.99,
-        discountPrice: null,
-        image: "/placeholder.svg?height=300&width=300",
-        rating: 4.2,
-        reviews: 95,
-        slug: "smart-watch",
-    },
-    {
-        id: 3,
-        name: "Bluetooth Speaker",
-        price: 79.99,
-        discountPrice: 59.99,
-        image: "/placeholder.svg?height=300&width=300",
-        rating: 4.7,
-        reviews: 156,
-        slug: "bluetooth-speaker",
-    },
-    {
-        id: 4,
-        name: "Laptop Backpack",
-        price: 49.99,
-        discountPrice: null,
-        image: "/placeholder.svg?height=300&width=300",
-        rating: 4.3,
-        reviews: 87,
-        slug: "laptop-backpack",
-    },
-    {
-        id: 5,
-        name: "Smartphone Case",
-        price: 24.99,
-        discountPrice: 19.99,
-        image: "/placeholder.svg?height=300&width=300",
-        rating: 4.1,
-        reviews: 64,
-        slug: "smartphone-case",
-    },
-    {
-        id: 6,
-        name: "Wireless Charger",
-        price: 34.99,
-        discountPrice: null,
-        image: "/placeholder.svg?height=300&width=300",
-        rating: 4.4,
-        reviews: 112,
-        slug: "wireless-charger",
-    },
-    {
-        id: 7,
-        name: "Digital Camera",
-        price: 349.99,
-        discountPrice: 299.99,
-        image: "/placeholder.svg?height=300&width=300",
-        rating: 4.6,
-        reviews: 73,
-        slug: "digital-camera",
-    },
-    {
-        id: 8,
-        name: "Gaming Mouse",
-        price: 59.99,
-        discountPrice: 49.99,
-        image: "/placeholder.svg?height=300&width=300",
-        rating: 4.8,
-        reviews: 189,
-        slug: "gaming-mouse",
-    },
-]
+import { useEffect, useState } from "react"
+import { fetchProducts } from "@/lib/fetchProducts"
 
 export default function FeaturedProducts() {
-    const [wishlist, setWishlist] = useState<number[]>([])
+    const [products, setProducts] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
 
-    const toggleWishlist = (productId: number) => {
-        if (wishlist.includes(productId)) {
-            setWishlist(wishlist.filter((id) => id !== productId))
-        } else {
-            setWishlist([...wishlist, productId])
-        }
+    useEffect(() => {
+        fetchProducts({ sort: "featured", page: 1 })
+            .then((data) => setProducts(data.products || []))
+            .finally(() => setLoading(false))
+    }, [])
+
+    if (loading) {
+        return <div className="text-center py-8">Đang tải sản phẩm nổi bật...</div>
+    }
+
+    if (!products.length) {
+        return <div className="text-center py-8 text-gray-500">Không có sản phẩm nổi bật</div>
     }
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
+            {products.slice(0, 8).map((product) => (
                 <div
                     key={product.id}
                     className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
                 >
                     <div className="relative">
                         <Link href={`/product/${product.slug}`}>
-                            <img src={product.image || "/placeholder.svg"} alt={product.name} className="w-full h-64 object-cover" />
+                            <img
+                                src={
+                                    (product.images && product.images.length > 0 && product.images[0]) ||
+                                    product.image_url ||
+                                    product.imageUrl ||
+                                    product.image ||
+                                    "/placeholder.svg"
+                                }
+                                alt={product.name}
+                                className="w-full h-64 object-cover"
+                            />
                         </Link>
                         <button
-                            onClick={() => toggleWishlist(product.id)}
                             className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm"
                         >
-                            <Heart
-                                className={`h-5 w-5 ${wishlist.includes(product.id) ? "text-red-500 fill-red-500" : "text-gray-400"}`}
-                            />
+                            <Heart className="h-5 w-5 text-gray-400" />
                         </button>
                         {product.discountPrice && (
                             <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
@@ -145,11 +77,11 @@ export default function FeaturedProducts() {
                             <div>
                                 {product.discountPrice ? (
                                     <div className="flex items-center">
-                                        <span className="text-lg font-bold text-gray-800">${product.discountPrice}</span>
-                                        <span className="text-sm text-gray-500 line-through ml-2">${product.price}</span>
+                                        <span className="text-lg font-bold text-gray-800">{product.discountPrice}</span>
+                                        <span className="text-sm text-gray-500 line-through ml-2">{product.price}</span>
                                     </div>
                                 ) : (
-                                    <span className="text-lg font-bold text-gray-800">${product.price}</span>
+                                    <span className="text-lg font-bold text-gray-800">{product.price}</span>
                                 )}
                             </div>
                             <button className="p-2 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 transition-colors duration-300">
