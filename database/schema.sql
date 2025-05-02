@@ -25,8 +25,14 @@ CREATE TABLE user_service.users
     updated_at    TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
     last_login    TIMESTAMP,
     is_active     BOOLEAN     DEFAULT TRUE,
-    is_deleted    BOOLEAN     DEFAULT FALSE,
-    role          VARCHAR(20) DEFAULT 'USER'
+    is_deleted    BOOLEAN     DEFAULT FALSE
+);
+
+CREATE TABLE user_service.user_roles
+(
+    user_id INTEGER NOT NULL REFERENCES user_service.users (user_id),
+    role    VARCHAR(20) NOT NULL,
+    PRIMARY KEY (user_id, role)
 );
 
 CREATE TABLE user_service.addresses
