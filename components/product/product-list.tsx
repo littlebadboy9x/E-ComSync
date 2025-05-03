@@ -30,7 +30,7 @@ export default async function ProductList({
         maxPrice,
     })
 
-    if (products.length === 0) {
+    if (!Array.isArray(products) || products.length === 0) {
         return (
             <div className="text-center py-12">
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">Không tìm thấy sản phẩm nào</h3>
@@ -66,7 +66,7 @@ function ProductCard({ product }) {
     return (
         <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="relative">
-                <Link href={`/product/${product.slug}`}>
+                <Link href={`/products/${product.slug}`}>
                     <img
                         src={
                             (product.images && product.images.length > 0 && product.images[0]) ||
@@ -88,7 +88,7 @@ function ProductCard({ product }) {
                 )}
             </div>
             <div className="p-4">
-                <Link href={`/product/${product.slug}`} className="block">
+                <Link href={`/products/${product.slug}`} className="block">
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
                 </Link>
                 <div className="flex items-center mb-2">

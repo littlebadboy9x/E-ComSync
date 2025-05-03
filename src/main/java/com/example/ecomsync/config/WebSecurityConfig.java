@@ -1,58 +1,48 @@
 package com.example.ecomsync.config;
 
+import com.example.ecomsync.security.jwt.AuthEntryPointJwt;
+import com.example.ecomsync.security.jwt.AuthTokenFilter;
+import com.example.ecomsync.security.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
+@EnableMethodSecurity
 public class WebSecurityConfig {
+    @Autowired
+    UserDetailsServiceImpl userDetailsService;
+
+    @Autowired
+    private AuthEntryPointJwt unauthorizedHandler;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                // Public endpoints - anyone can access
-                .requestMatchers(
-                    "/",
-                    "/index.html",
-                    "/static/**",
-                    "/favicon.ico",
-                    "/api/products/**",
-                    "/api/categories/**",
-                    "/api/search/**"
-                ).permitAll()
-                
-                // Admin endpoints - only admin can access
-                .requestMatchers(
-                    "/api/admin/**",
-                    "/api/products/create",
-                    "/api/products/update/**",
-                    "/api/products/delete/**"
-                ).hasRole("ADMIN")
-                
-                // User endpoints - authenticated users can access
-                .requestMatchers(
-                    "/api/cart/**",
-                    "/api/orders/**",
-                    "/api/profile/**"
-                ).authenticated()
-                
-                .anyRequest().permitAll()
-            );
+    public AuthTokenFilter authenticationJwtTokenFilter() {
+        return new AuthTokenFilter();
+    }
 
-        return http.build();
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+
+        return authProvider;
     }
 
     @Bean
@@ -61,15 +51,45 @@ public class WebSecurityConfig {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth ->
+                        auth
+                                .requestMatchers(
+                                    "/", "/home", "/index", "/favicon.ico", "/static/**",
+                                    "/api/auth/**",
+                                    "/api/products", "/api/products/**",
+                                    "/api/product", "/api/product/**",
+                                    "/api/categories", "/api/categories/**",
+                                    "/api/featured-products", "/api/featured-products/**"
+                                ).permitAll()
+                                .anyRequest().authenticated()
+                );
+
+        http.authenticationProvider(authenticationProvider());
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+        configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
         configuration.setAllowCredentials(true);
-        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-} 
+}

@@ -5,25 +5,25 @@ import ProductSort from "../../components/product/product-sort"
 import ProductSearch from "../../components/product/product-search"
 
 export const metadata = {
-    title: "Products | E-ComSync",
-    description: "Browse our wide range of products",
+    title: "Sản phẩm | E-ComSync",
+    description: "Khám phá danh mục sản phẩm đa dạng của chúng tôi",
 }
 
-export default async function ProductsPage({
-    searchParams,
+export default function ProductsPage({
+    searchParams = {}
 }: {
     searchParams?: { [key: string]: string | string[] }
 }) {
-    const search = typeof searchParams?.search === "string" ? searchParams.search : ""
-    const category = typeof searchParams?.category === "string" ? searchParams.category : ""
-    const sort = typeof searchParams?.sort === "string" ? searchParams.sort : "featured"
-    const page = typeof searchParams?.page === "string" ? Number.parseInt(searchParams.page) : 1
-    const minPrice = typeof searchParams?.minPrice === "string" ? Number.parseFloat(searchParams.minPrice) : undefined
-    const maxPrice = typeof searchParams?.maxPrice === "string" ? Number.parseFloat(searchParams.maxPrice) : undefined
+    const search = typeof searchParams.search === "string" ? searchParams.search : ""
+    const category = typeof searchParams.category === "string" ? searchParams.category : ""
+    const sort = typeof searchParams.sort === "string" ? searchParams.sort : "featured"
+    const page = typeof searchParams.page === "string" ? Number.parseInt(searchParams.page) : 1
+    const minPrice = typeof searchParams.minPrice === "string" ? Number.parseFloat(searchParams.minPrice) : undefined
+    const maxPrice = typeof searchParams.maxPrice === "string" ? Number.parseFloat(searchParams.maxPrice) : undefined
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Products</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">Sản phẩm</h1>
 
             {/* Search and Sort Row */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">

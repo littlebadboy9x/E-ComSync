@@ -9,30 +9,42 @@ export default function ChatbotButton() {
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState([{ id: 1, text: "Hello! How can I help you today?", sender: "bot" }])
     const [newMessage, setNewMessage] = useState("")
+    const [loading, setLoading] = useState(false)
 
     const toggleChat = () => {
         setIsOpen(!isOpen)
     }
 
-    const handleSendMessage = (e: React.FormEvent) => {
+    const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (newMessage.trim() === "") return
 
         // Add user message
         const userMessage = { id: Date.now(), text: newMessage, sender: "user" }
-        setMessages([...messages, userMessage])
+        setMessages((prev) => [...prev, userMessage])
         setNewMessage("")
+        setLoading(true)
 
-        // Simulate bot response (in a real app, this would call the backend)
-        setTimeout(() => {
+        // Gửi message lên backend và nhận phản hồi AI
+        try {
+            const res = await fetch("http://localhost:8080/api/chatbot/message", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userMessage.text })
+            })
+            const data = await res.json()
             const botMessage = {
                 id: Date.now() + 1,
-                text: "Thanks for your message! Our AI is processing your request.",
-                sender: "bot",
+                text: data.reply || "Xin lỗi, tôi không thể trả lời lúc này.",
+                sender: "bot"
             }
             setMessages((prev) => [...prev, botMessage])
-        }, 1000)
+        } catch (err) {
+            setMessages((prev) => [...prev, { id: Date.now() + 2, text: "Lỗi kết nối chatbot!", sender: "bot" }])
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -89,8 +101,9 @@ export default function ChatbotButton() {
                             onChange={(e) => setNewMessage(e.target.value)}
                             placeholder="Type your message..."
                             className="flex-1 border rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            disabled={loading}
                         />
-                        <button type="submit" className="bg-emerald-500 text-white px-4 py-2 rounded-r-lg hover:bg-emerald-600">
+                        <button type="submit" className="bg-emerald-500 text-white px-4 py-2 rounded-r-lg hover:bg-emerald-600" disabled={loading}>
                             <Send className="h-5 w-5" />
                         </button>
                     </form>

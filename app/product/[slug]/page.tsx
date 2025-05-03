@@ -40,7 +40,7 @@ const product = {
 }
 
 export default function ProductPage({ params }: { params: { slug: string } }) {
-    // In a real app, you would fetch the product data based on the slug
+    // TODO: Fetch product data from /api/products/slug/[slug]
 
     return (
         <div className="min-h-screen bg-gray-50">

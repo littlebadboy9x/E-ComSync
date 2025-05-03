@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
     title: 'E-ComSync',
-    description: 'E-Commerce Platform',
+    description: 'Nền tảng Thương mại Điện tử',
 };
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
+        <html lang="vi">
             <body className={inter.className}>
                 <AuthProvider>
                     {children}

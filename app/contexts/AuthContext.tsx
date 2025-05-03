@@ -6,7 +6,7 @@ import axios from 'axios';
 interface User {
     id: number;
     username: string;
-    role: string;
+    roles: string[];
 }
 
 interface AuthContextType {
@@ -34,26 +34,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const token = localStorage.getItem('token');
         if (token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            axios.get('/api/auth/me')
+            axios.get('http://localhost:8080/api/auth/me')
                 .then(response => {
                     setUser(response.data);
                 })
                 .catch(() => {
                     localStorage.removeItem('token');
                     delete axios.defaults.headers.common['Authorization'];
+                    setUser(null);
                 })
                 .finally(() => {
                     setLoading(false);
                 });
         } else {
+            setUser(null);
             setLoading(false);
         }
     }, []);
 
     const login = async (username: string, password: string) => {
-        const response = await axios.post('/api/auth/login', { username, password });
-        const { token } = response.data;
+        const response = await axios.post('http://localhost:8080/api/auth/login', { username, password });
+        const { token, roles } = response.data;
         localStorage.setItem('token', token);
+        localStorage.setItem('roles', JSON.stringify(roles));
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setUser(response.data);
         return response.data;
@@ -61,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('roles');
         delete axios.defaults.headers.common['Authorization'];
         setUser(null);
     };

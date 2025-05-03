@@ -1,5 +1,6 @@
 package com.example.ecomsync.model;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +11,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users", schema = "user_service")
+@Table(name = "users",schema = "user_service",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "username"),
+                @UniqueConstraint(columnNames = "email")
+        })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,7 +23,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Integer id;
+    private Long userId;
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -27,16 +38,16 @@ public class User {
     private String email;
 
     @Column(name = "password_hash", nullable = false)
-    private String password;
-
-    @Column(name = "first_name")
-    private String firstName;
-
-    @Column(name = "last_name")
-    private String lastName;
+    private String passwordHash;
 
     @Column(name = "phone_number")
     private String phoneNumber;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -48,29 +59,29 @@ public class User {
     private LocalDateTime lastLogin;
 
     @Column(name = "is_active")
-    private boolean isActive;
+    private Boolean isActive;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "role")
-    private Set<String> roles = new HashSet<>();
-
-    // Thêm trường is_deleted
     @Column(name = "is_deleted")
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         isActive = true;
-        if (roles.isEmpty()) {
-            roles.add("ROLE_USER");
-        }
+        isDeleted = false;
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public User(String firstName, String lastName, String username, String email, String passwordHash) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.email = email;
+        this.passwordHash = passwordHash;
     }
 }
