@@ -65,13 +65,16 @@ public class WebSecurityConfig {
                         auth
                                 .requestMatchers(
                                     "/", "/home", "/index", "/favicon.ico", "/static/**",
-                                    "/api/auth/**",
+                                    "/api/auth/login", "/api/auth/register",
                                     "/api/products", "/api/products/**",
                                     "/api/product", "/api/product/**",
                                     "/api/categories", "/api/categories/**",
-                                    "/api/featured-products", "/api/featured-products/**"
+                                    "/api/featured-products", "/api/featured-products/**",
+                                    "/api/chatbot/**",
+                                    "/error"
                                 ).permitAll()
-                                .anyRequest().authenticated()
+                                .requestMatchers("/api/auth/me").authenticated()
+                                .anyRequest().permitAll()
                 );
 
         http.authenticationProvider(authenticationProvider());

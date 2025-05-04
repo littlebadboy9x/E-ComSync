@@ -15,65 +15,25 @@ export default function AdminDashboard() {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                // Trong thực tế, bạn sẽ gọi API để lấy dữ liệu
-                // Ở đây chúng ta sẽ sử dụng dữ liệu mẫu
-                setTimeout(() => {
-                    setStats({
-                        totalProducts: 152,
-                        totalOrders: 87,
-                        totalUsers: 543,
-                        totalRevenue: 15680.42,
-                    })
-                    setRecentOrders([
-                        {
-                            id: 1,
-                            orderNumber: "ORD-2023-001",
-                            customer: "John Doe",
-                            date: "2023-11-15",
-                            status: "Completed",
-                            total: 129.99,
-                        },
-                        {
-                            id: 2,
-                            orderNumber: "ORD-2023-002",
-                            customer: "Jane Smith",
-                            date: "2023-11-14",
-                            status: "Processing",
-                            total: 259.98,
-                        },
-                        {
-                            id: 3,
-                            orderNumber: "ORD-2023-003",
-                            customer: "Robert Johnson",
-                            date: "2023-11-14",
-                            status: "Shipped",
-                            total: 79.99,
-                        },
-                        {
-                            id: 4,
-                            orderNumber: "ORD-2023-004",
-                            customer: "Emily Davis",
-                            date: "2023-11-13",
-                            status: "Completed",
-                            total: 149.97,
-                        },
-                        {
-                            id: 5,
-                            orderNumber: "ORD-2023-005",
-                            customer: "Michael Wilson",
-                            date: "2023-11-12",
-                            status: "Cancelled",
-                            total: 99.99,
-                        },
-                    ])
-                    setLoading(false)
-                }, 1000)
+                const token = localStorage.getItem("token")
+                const res = await fetch("http://localhost:8080/api/admin/dashboard", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                if (!res.ok) throw new Error("Failed to fetch dashboard data")
+                const data = await res.json()
+                setStats({
+                    totalProducts: data.totalProducts,
+                    totalOrders: data.totalOrders,
+                    totalUsers: data.totalUsers,
+                    totalRevenue: data.totalRevenue,
+                })
+                setRecentOrders(data.recentOrders || [])
             } catch (error) {
                 console.error("Error fetching dashboard data:", error)
+            } finally {
                 setLoading(false)
             }
         }
-
         fetchDashboardData()
     }, [])
 

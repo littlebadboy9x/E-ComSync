@@ -28,13 +28,18 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     try {
         const id = params.id
         const body = await request.json()
+        const token = request.headers.get("Authorization")?.split(" ")[1]
+
+        if (!token) {
+            return NextResponse.json({ message: "No token provided" }, { status: 401 })
+        }
 
         // Gọi API backend
         const response = await fetch(`${process.env.BACKEND_API_URL}/api/admin/products/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${getAuthToken(request)}`,
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(body),
         })

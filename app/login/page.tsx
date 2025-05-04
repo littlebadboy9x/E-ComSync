@@ -39,7 +39,7 @@ export default function LoginPage() {
 
             // Chuyển hướng dựa trên vai trò
             if (data.roles && data.roles.includes("ROLE_ADMIN")) {
-                router.push("/admin")
+                router.push("/admin/dashboard")
             } else {
                 router.push("/")
             }

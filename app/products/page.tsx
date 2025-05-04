@@ -17,7 +17,7 @@ export default function ProductsPage({
     const search = typeof searchParams.search === "string" ? searchParams.search : ""
     const category = typeof searchParams.category === "string" ? searchParams.category : ""
     const sort = typeof searchParams.sort === "string" ? searchParams.sort : "featured"
-    const page = typeof searchParams.page === "string" ? Number.parseInt(searchParams.page) : 1
+    const page = typeof searchParams.page === "string" ? Number.parseInt(searchParams.page) : 0
     const minPrice = typeof searchParams.minPrice === "string" ? Number.parseFloat(searchParams.minPrice) : undefined
     const maxPrice = typeof searchParams.maxPrice === "string" ? Number.parseFloat(searchParams.maxPrice) : undefined
 

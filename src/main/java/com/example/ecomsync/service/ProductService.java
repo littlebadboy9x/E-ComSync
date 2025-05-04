@@ -3,6 +3,8 @@ package com.example.ecomsync.service;
 import com.example.ecomsync.dto.ProductDTO;
 import com.example.ecomsync.model.Product;
 import com.example.ecomsync.repository.ProductRepository;
+import com.example.ecomsync.repository.CategoryRepository;
+import com.example.ecomsync.model.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,9 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     public Page<ProductDTO> findProductsByFilters(
             String search,
             String categoryId,
@@ -26,9 +31,7 @@ public class ProductService {
             BigDecimal maxPrice,
             Pageable pageable) {
 
-        Page<Product> products = productRepository.findProductsByFilters(
-                search, categoryId, minPrice, maxPrice, pageable);
-
+        Page<Product> products = productRepository.findAll(pageable);
         return products.map(this::convertToDTO);
     }
 
@@ -55,6 +58,62 @@ public class ProductService {
         return products.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    public ProductDTO createProduct(ProductDTO productDTO) {
+        Product product = new Product();
+        product.setName(productDTO.getName());
+        product.setSlug(productDTO.getSlug());
+        product.setDescription(productDTO.getDescription());
+        product.setPrice(productDTO.getPrice());
+        product.setDiscountPrice(productDTO.getDiscount_price());
+        product.setImageUrl(productDTO.getImage_url());
+        product.setRating(productDTO.getRating());
+        product.setReviews(productDTO.getReviews());
+        product.setStockQuantity(productDTO.getStock_quantity());
+        // Set category nếu có
+        if (productDTO.getCategory_id() != null && !productDTO.getCategory_id().isEmpty()) {
+            try {
+                Long catId = Long.parseLong(productDTO.getCategory_id());
+                Category category = categoryRepository.findById(catId)
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+                product.setCategory(category);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("Invalid category_id format");
+            }
+        }
+        Product saved = productRepository.save(product);
+        return convertToDTO(saved);
+    }
+
+    public ProductDTO updateProduct(Long id, ProductDTO productDTO) {
+        Product product = productRepository.findById(id).orElseThrow();
+        product.setName(productDTO.getName());
+        product.setSlug(productDTO.getSlug());
+        product.setDescription(productDTO.getDescription());
+        product.setPrice(productDTO.getPrice());
+        product.setDiscountPrice(productDTO.getDiscount_price());
+        product.setImageUrl(productDTO.getImage_url());
+        product.setRating(productDTO.getRating());
+        product.setReviews(productDTO.getReviews());
+        product.setStockQuantity(productDTO.getStock_quantity());
+        // Set category nếu có
+        if (productDTO.getCategory_id() != null && !productDTO.getCategory_id().isEmpty()) {
+            try {
+                Long catId = Long.parseLong(productDTO.getCategory_id());
+                Category category = categoryRepository.findById(catId)
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+                product.setCategory(category);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("Invalid category_id format");
+            }
+        }
+        Product saved = productRepository.save(product);
+        return convertToDTO(saved);
+    }
+
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
     }
 
     private ProductDTO convertToDTO(Product product) {

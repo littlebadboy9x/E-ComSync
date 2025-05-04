@@ -7,8 +7,9 @@ export async function GET(request: Request) {
         const search = url.searchParams.get("search") || ""
 
         // Gọi API backend
+        const backendPage = Math.max(Number.parseInt(page) - 1, 0)
         const response = await fetch(
-            `${process.env.BACKEND_API_URL}/api/admin/products?page=${Number.parseInt(page) - 1}&size=10&search=${encodeURIComponent(search)}`,
+            `${process.env.BACKEND_API_URL}/api/admin/products?page=${backendPage}&size=10&search=${encodeURIComponent(search)}`,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -60,7 +61,9 @@ export async function POST(request: Request) {
 }
 
 function getAuthToken(request: Request): string {
-    // Trong thực tế, bạn sẽ lấy token từ cookie hoặc header
-    // Đây chỉ là mã giả
-    return "dummy_token"
+    const token = request.headers.get("Authorization")?.split(" ")[1]
+    if (!token) {
+        throw new Error("No token provided")
+    }
+    return token
 }

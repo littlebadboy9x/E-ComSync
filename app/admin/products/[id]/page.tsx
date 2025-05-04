@@ -59,7 +59,7 @@ export default function ProductForm({ params }: { params: { id: string } }) {
         const fetchProduct = async () => {
             if (!isNew && productId) {
                 try {
-                    const response = await fetch(`/api/admin/products/${productId}`)
+                    const response = await fetch(`/api/products/${productId}`)
                     if (response.ok) {
                         const data = await response.json()
                         setFormData({
@@ -94,6 +94,12 @@ export default function ProductForm({ params }: { params: { id: string } }) {
                 ...formData,
                 [name]: value === "" ? "" : Number(value),
             })
+        } else if (name === "category_id") {
+            // Ensure category_id is a number
+            setFormData({
+                ...formData,
+                [name]: value === "" ? "" : Number(value),
+            })
         } else {
             setFormData({
                 ...formData,
@@ -122,13 +128,14 @@ export default function ProductForm({ params }: { params: { id: string } }) {
         setError("")
 
         try {
-            const url = isNew ? "/api/admin/products" : `/api/admin/products/${productId}`
+            const url = isNew ? "/api/products" : `/api/products/${productId}`
             const method = isNew ? "POST" : "PUT"
 
             const response = await fetch(url, {
                 method,
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
                 body: JSON.stringify(formData),
             })

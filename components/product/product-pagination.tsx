@@ -15,7 +15,7 @@ export default function ProductPagination({ currentPage, totalPages }: ProductPa
         // Create new URLSearchParams object
         const params = new URLSearchParams(searchParams.toString())
 
-        // Update page parameter
+        // Update page parameter (truyền đúng index, bắt đầu từ 0)
         params.set("page", page.toString())
 
         // Navigate with updated params
@@ -25,34 +25,10 @@ export default function ProductPagination({ currentPage, totalPages }: ProductPa
     // Generate page numbers to display
     const getPageNumbers = () => {
         const pages = []
-
-        // Always show first page
-        pages.push(1)
-
-        // Calculate range around current page
-        const rangeStart = Math.max(2, currentPage - 1)
-        const rangeEnd = Math.min(totalPages - 1, currentPage + 1)
-
-        // Add ellipsis after first page if needed
-        if (rangeStart > 2) {
-            pages.push("ellipsis-start")
-        }
-
-        // Add pages in range
-        for (let i = rangeStart; i <= rangeEnd; i++) {
+        // Luôn show tất cả các trang (bạn có thể tối ưu lại nếu muốn)
+        for (let i = 0; i < totalPages; i++) {
             pages.push(i)
         }
-
-        // Add ellipsis before last page if needed
-        if (rangeEnd < totalPages - 1) {
-            pages.push("ellipsis-end")
-        }
-
-        // Always show last page if more than 1 page
-        if (totalPages > 1) {
-            pages.push(totalPages)
-        }
-
         return pages
     }
 
@@ -98,14 +74,14 @@ export default function ProductPagination({ currentPage, totalPages }: ProductPa
                 return (
                     <button
                         key={`page-${page}`}
-                        onClick={() => handlePageChange(Number(page))}
+                        onClick={() => handlePageChange(page)}
                         className={`px-3 py-1 rounded-md ${
                             currentPage === page
                                 ? "bg-emerald-500 text-white"
                                 : "border border-gray-300 text-gray-600 hover:bg-gray-100"
                         }`}
                     >
-                        {page}
+                        {page + 1}
                     </button>
                 )
             })}
